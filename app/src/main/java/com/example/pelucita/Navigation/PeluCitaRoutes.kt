@@ -8,7 +8,7 @@ object LoginScreenRoute
 
 // Ruta para la pantalla de Cliente
 @Serializable
-object ClienteHomeScreenRoute
+data class ClienteHomeScreenRoute(val clienteId: Int)
 
 // Ruta para la pantalla de Admin
 @Serializable
@@ -21,3 +21,6 @@ object RegistroScreenRoute
 // Ruta para la pantalla de Citas, pasandi id
 @Serializable
 data class CitaDetalleRoute(val citaId: Int)
+
+@Serializable
+data class NuevaCitaScreenRoute(val clienteId: Int)

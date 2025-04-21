@@ -1,16 +1,22 @@
 package com.example.pelucita.ui.Screens
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import com.example.pelucita.Data.Repository.DBHelper
 
 @Composable
-fun RegistroScreen(onRegistroExitoso: () -> Unit) {
+fun RegistroScreen(onRegistroExitoso: (usuarioId: Int) -> Unit) {
+
+    val context = LocalContext.current
+    val dbHelper = remember { DBHelper(context) }
 
     //Variables de nombre, email y contraseña
     var nombre by remember { mutableStateOf("") }
@@ -57,11 +63,22 @@ fun RegistroScreen(onRegistroExitoso: () -> Unit) {
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        Button(onClick = {
-            //Aqui registramos al usuario exitosamente
-            onRegistroExitoso()
-        }) {
-            Text("Registrarse")
+        Button(
+            onClick = {
+                val id = dbHelper
+                    .registrarUsuario(nombre.trim(), email.trim(), password, "cliente")
+                    .toInt()
+                if (id > 0) {
+                    onRegistroExitoso(id)
+                } else {
+                    Toast
+                        .makeText(context, "Error al registrar", Toast.LENGTH_SHORT)
+                        .show()
+                }
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Registrar")
         }
     }
 }

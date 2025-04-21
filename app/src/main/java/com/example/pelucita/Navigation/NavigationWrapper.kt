@@ -1,33 +1,28 @@
 package com.example.pelucita.Navigation
 
+import ClienteHomeScreen
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.pelucita.ui.Screens.AdminHomeScreen
-import com.example.pelucita.ui.Screens.CitaDetalleScreen
-import com.example.pelucita.ui.Screens.ClienteHomeScreen
-import com.example.pelucita.ui.Screens.LoginScreen
-import com.example.pelucita.ui.Screens.RegistroScreen
+import com.example.pelucita.ui.Screens.*
+import com.example.pelucita.Navigation.*
 
 @Composable
-fun NavigationWrapper(modifier: Modifier) {
-
-    // Controlador de navegación
+fun NavigationWrapper(modifier: Modifier = Modifier) {
     val navController = rememberNavController()
 
-    // Definimos las rutas de navegación
     NavHost(navController = navController, startDestination = LoginScreenRoute) {
 
         // Pantalla de login
         composable<LoginScreenRoute> {
             LoginScreen(
-                onLoginSucces = { esAdmin ->
+                onLoginSuccess = { usuarioId, esAdmin ->
                     if (esAdmin) {
                         navController.navigate(AdminHomeScreenRoute)
                     } else {
-                        navController.navigate(ClienteHomeScreenRoute)
+                        navController.navigate(ClienteHomeScreenRoute(usuarioId))
                     }
                 },
                 onRegistrarse = {
@@ -39,28 +34,49 @@ fun NavigationWrapper(modifier: Modifier) {
         // Pantalla de registro
         composable<RegistroScreenRoute> {
             RegistroScreen(
-                onRegistroExitoso = {
-                    navController.navigate(ClienteHomeScreenRoute)
+                onRegistroExitoso = { usuarioId ->
+                    navController.navigate(ClienteHomeScreenRoute(usuarioId)) {
+                        // Opcional: limpiar backstack para que no vuelva al login
+                        popUpTo(LoginScreenRoute) { inclusive = true }
+                    }
                 }
             )
         }
 
-        // Pantalla principal del cliente
-        composable<ClienteHomeScreenRoute> {
-            ClienteHomeScreen(onVerCita = { citaId ->
-                navController.navigate(CitaDetalleRoute(citaId))
-            })
+        // Home del cliente
+        composable<ClienteHomeScreenRoute> { backStackEntry ->
+            val clienteId = backStackEntry.arguments?.getInt("clienteId") ?: 0
+            ClienteHomeScreen(
+                clienteId = clienteId,
+                onVerCita = { citaId ->
+                    navController.navigate(CitaDetalleRoute(citaId))
+                },
+                onNuevaCita = {
+                    navController.navigate(NuevaCitaScreenRoute(clienteId))
+                }
+            )
         }
 
-        // Pantalla principal del administrador
-        composable<AdminHomeScreenRoute> {
-            AdminHomeScreen()
+        // Nueva cita
+        composable<NuevaCitaScreenRoute> { backStackEntry ->
+            val clienteId = backStackEntry.arguments?.getInt("clienteId") ?: 0
+            NuevaCitaScreen(
+                clienteId = clienteId,
+                onCitaGuardada = {
+                    navController.popBackStack()
+                }
+            )
         }
 
-        // Pantalla de detalle de una cita
+        // Detalle de una cita
         composable<CitaDetalleRoute> { backStackEntry ->
             val citaId = backStackEntry.arguments?.getInt("citaId") ?: 0
             CitaDetalleScreen(citaId = citaId)
+        }
+
+        // Home del admin
+        composable<AdminHomeScreenRoute> {
+            AdminHomeScreen()
         }
     }
 }
