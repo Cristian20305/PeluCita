@@ -1,5 +1,6 @@
 package com.example.pelucita.Navigation
 
+import AdminHomeScreen
 import ClienteHomeScreen
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
