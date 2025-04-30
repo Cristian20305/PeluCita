@@ -110,4 +110,26 @@ class DBHelper(context: Context) {
         cursor.close()
         return lista
     }
+    fun obtenerCitasPorFecha(fecha: String): List<Cita> {
+        val lista = mutableListOf<Cita>()
+        val cursor = db.rawQuery(
+            "SELECT * FROM citas WHERE fecha = ?",
+            arrayOf(fecha)
+        )
+        while (cursor.moveToNext()) {
+            lista.add(
+                Cita(
+                    id = cursor.getInt(cursor.getColumnIndexOrThrow("id")),
+                    clienteId = cursor.getInt(cursor.getColumnIndexOrThrow("cliente_id")),
+                    fecha = cursor.getString(cursor.getColumnIndexOrThrow("fecha")),
+                    hora = cursor.getString(cursor.getColumnIndexOrThrow("hora")),
+                    servicio = cursor.getString(cursor.getColumnIndexOrThrow("servicio")),
+                    peluquero = cursor.getString(cursor.getColumnIndexOrThrow("peluquero"))
+                )
+            )
+        }
+        cursor.close()
+        return lista
+    }
+
 }
