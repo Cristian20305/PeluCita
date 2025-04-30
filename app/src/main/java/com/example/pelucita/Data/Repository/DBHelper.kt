@@ -91,6 +91,7 @@ class DBHelper(context: Context) {
         return cita
     }
 
+    // Mostramos todas las citas
     fun obtenerTodasLasCitas(): List<Cita> {
 
         val lista = mutableListOf<Cita>()
@@ -110,6 +111,7 @@ class DBHelper(context: Context) {
         cursor.close()
         return lista
     }
+    // Obtenemos citas por esas horas que pasamis
     fun obtenerCitasPorFecha(fecha: String): List<Cita> {
         val lista = mutableListOf<Cita>()
         val cursor = db.rawQuery(
@@ -131,5 +133,23 @@ class DBHelper(context: Context) {
         cursor.close()
         return lista
     }
+
+    // Eliminamos una cita de la base de datos
+    fun eliminarCita(citaId: Int): Int {
+        return db.delete("citas", "id = ?", arrayOf(citaId.toString()))
+    }
+
+    // Podemis actualizar o editar una cita
+    fun actualizarCita(cita: Cita): Int {
+        val valores = ContentValues().apply {
+            put("fecha", cita.fecha)
+            put("hora", cita.hora)
+            put("servicio", cita.servicio)
+            put("peluquero", cita.peluquero)
+        }
+        return db.update("citas", valores, "id = ?", arrayOf(cita.id.toString()))
+    }
+
+
 
 }

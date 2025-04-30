@@ -57,6 +57,21 @@ fun ClienteHomeScreen(
                                 Text("✂️ $it", style = MaterialTheme.typography.bodySmall)
                             }
                         }
+                        Row(
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            TextButton(onClick = { onVerCita(cita.id) }) {
+                                Text("Editar")
+                            }
+
+                            TextButton(onClick = {
+                                dbHelper.eliminarCita(cita.id)
+                                citas = dbHelper.obtenerCitasPorCliente(clienteId) // recargar
+                            }) {
+                                Text("Cancelar", color = MaterialTheme.colorScheme.error)
+                            }
+                        }
                     }
                 }
             }
