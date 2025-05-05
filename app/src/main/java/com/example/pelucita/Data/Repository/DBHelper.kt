@@ -150,6 +150,23 @@ class DBHelper(context: Context) {
         return db.update("citas", valores, "id = ?", arrayOf(cita.id.toString()))
     }
 
+    fun obtenerTodosLosUsuarios(): List<Usuario> {
+        val lista = mutableListOf<Usuario>()
+        val cursor = db.rawQuery("SELECT * FROM usuarios WHERE rol = 'cliente'", null)
+
+        while (cursor.moveToNext()) {
+            val usuario = Usuario(
+                id = cursor.getInt(cursor.getColumnIndexOrThrow("id")),
+                nombre = cursor.getString(cursor.getColumnIndexOrThrow("nombre")),
+                email = cursor.getString(cursor.getColumnIndexOrThrow("email")),
+                contrasena = cursor.getString(cursor.getColumnIndexOrThrow("contrasena")),
+                rol = cursor.getString(cursor.getColumnIndexOrThrow("rol"))
+            )
+            lista.add(usuario)
+        }
+        cursor.close()
+        return lista
+    }
 
 
 }

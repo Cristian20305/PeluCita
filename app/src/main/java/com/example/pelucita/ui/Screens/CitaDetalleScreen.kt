@@ -27,13 +27,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
 import com.example.pelucita.Data.Model.Cita
 import com.example.pelucita.Data.Repository.DBHelper
 import com.example.pelucita.Utils.generarHorasDisponibles
 import java.util.Calendar
 
 @Composable
-fun CitaDetalleScreen(citaId: Int) {
+fun CitaDetalleScreen(citaId: Int, navController: NavHostController) {
     val context = LocalContext.current
     val dbHelper = remember { DBHelper(context) }
     val activity = LocalContext.current as? Activity

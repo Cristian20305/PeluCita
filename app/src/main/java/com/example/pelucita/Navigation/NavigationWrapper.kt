@@ -8,7 +8,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.pelucita.ui.Screens.*
-import com.example.pelucita.Navigation.*
 
 @Composable
 fun NavigationWrapper(modifier: Modifier = Modifier) {
@@ -72,12 +71,12 @@ fun NavigationWrapper(modifier: Modifier = Modifier) {
         // Detalle de una cita
         composable<CitaDetalleRoute> { backStackEntry ->
             val citaId = backStackEntry.arguments?.getInt("citaId") ?: 0
-            CitaDetalleScreen(citaId = citaId)
+            CitaDetalleScreen(citaId = citaId, navController)
         }
 
         // Home del admin
         composable<AdminHomeScreenRoute> {
-            AdminHomeScreen()
+            AdminHomeScreen(navController)
         }
     }
 }
