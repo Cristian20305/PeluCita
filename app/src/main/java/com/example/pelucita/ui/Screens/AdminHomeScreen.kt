@@ -4,11 +4,18 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ContentCut
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.navigation.NavController
 import com.example.pelucita.Data.Model.Cita
 import com.example.pelucita.Data.Model.Usuario
@@ -62,14 +69,24 @@ fun AdminHomeScreen(navController: NavController) {
             .padding(16.dp)
     ) {
         // Título de la pantalla
-        Text("Calendario de citas", style = MaterialTheme.typography.titleLarge)
+        Text(
+            "Gestión de citas",
+            style = MaterialTheme.typography.titleLarge,
+            fontSize = 24.sp
+        )
 
         Spacer(modifier = Modifier.height(16.dp))
 
         // Botón para abrir el calendario y seleccionar fecha
-        Button(onClick = { datePicker.show() }) {
-            // Si ya hay una fecha seleccionada, la mostramos
-            Text(if (fechaSeleccionada.isEmpty()) "Seleccionar fecha" else "Fecha: $fechaSeleccionada")
+        Button(
+            onClick = { datePicker.show() },
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(12.dp)
+        ) {
+            Text(
+                if (fechaSeleccionada.isEmpty()) "Seleccionar fecha"
+                else "📅 Fecha seleccionada: $fechaSeleccionada"
+            )
         }
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -81,9 +98,10 @@ fun AdminHomeScreen(navController: NavController) {
                 clientes = dbHelper.obtenerTodosLosUsuarios()
                 mostrarDialogoClientes = true
             },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(12.dp)
         ) {
-            Text("➕ Nueva cita (admin)")
+            Text("➕ Agendar nueva cita")
         }
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -92,7 +110,12 @@ fun AdminHomeScreen(navController: NavController) {
         if (fechaSeleccionada.isNotEmpty()) {
             if (citas.isEmpty()) {
                 // Si no hay citas, mensaje informativo
-                Text("No hay citas para esta fecha", color = MaterialTheme.colorScheme.outline)
+                Text(
+                    "No se han encontrado citas para la fecha seleccionada.",
+                    color = MaterialTheme.colorScheme.outline,
+                    fontSize = 16.sp,
+                    modifier = Modifier.padding(top = 16.dp)
+                )
             } else {
                 // Lista de citas en ese día
                 LazyColumn {
@@ -101,16 +124,36 @@ fun AdminHomeScreen(navController: NavController) {
                         Card(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(vertical = 6.dp),
-                            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+                                .padding(vertical = 8.dp),
+                            elevation = CardDefaults.cardElevation(6.dp),
+                            shape = RoundedCornerShape(16.dp),
+                            // 🎨 Aplicamos colores personalizados desde el theme
+                            colors = CardDefaults.cardColors(
+                                containerColor = MaterialTheme.colorScheme.surfaceVariant
+                            )
                         ) {
                             Column(modifier = Modifier.padding(16.dp)) {
-                                Text("Hora: ${cita.hora}")
-                                Text("Servicio: ${cita.servicio}")
-                                Text("Peluquero: ${cita.peluquero ?: "No asignado"}")
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Icon(Icons.Default.Schedule, contentDescription = null)
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text("Hora: ${cita.hora}")
+                                }
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Icon(Icons.Default.ContentCut, contentDescription = null)
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text("Servicio: ${cita.servicio}")
+                                }
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Icon(Icons.Default.Person, contentDescription = null)
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text("Peluquero: ${cita.peluquero ?: "No asignado"}")
+                                }
+                                Spacer(modifier = Modifier.height(8.dp))
                                 Text("ID Cliente: ${cita.clienteId}")
 
-                                Spacer(modifier = Modifier.height(8.dp))
+                                Spacer(modifier = Modifier.height(16.dp))
 
                                 // Botones en fila: Editar y Eliminar
                                 Row(
@@ -123,12 +166,13 @@ fun AdminHomeScreen(navController: NavController) {
                                             // Navegamos a la pantalla de detalle para editar la cita
                                             navController.navigate(CitaDetalleRoute(cita.id))
                                         },
-                                        modifier = Modifier.weight(1f)
+                                        modifier = Modifier.weight(1f),
+                                        shape = RoundedCornerShape(10.dp)
                                     ) {
-                                        Text("Editar")
+                                        Text("Editar cita")
                                     }
 
-                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Spacer(modifier = Modifier.width(12.dp))
 
                                     // Botón para eliminar con confirmación
                                     Button(
@@ -136,9 +180,10 @@ fun AdminHomeScreen(navController: NavController) {
                                         colors = ButtonDefaults.buttonColors(
                                             containerColor = MaterialTheme.colorScheme.error
                                         ),
-                                        modifier = Modifier.weight(1f)
+                                        modifier = Modifier.weight(1f),
+                                        shape = RoundedCornerShape(10.dp)
                                     ) {
-                                        Text("Eliminar", color = MaterialTheme.colorScheme.onError)
+                                        Text("Eliminar cita", color = MaterialTheme.colorScheme.onError)
                                     }
                                 }
                             }
@@ -148,7 +193,12 @@ fun AdminHomeScreen(navController: NavController) {
             }
         } else {
             // Si aún no se ha seleccionado una fecha
-            Text("Selecciona una fecha para ver las citas")
+            Text(
+                "Por favor, selecciona una fecha para visualizar las citas programadas.",
+                fontSize = 16.sp,
+                color = MaterialTheme.colorScheme.outline,
+                modifier = Modifier.padding(top = 16.dp)
+            )
         }
     }
 
@@ -161,7 +211,7 @@ fun AdminHomeScreen(navController: NavController) {
                     // Eliminamos la cita y actualizamos la lista
                     dbHelper.eliminarCita(cita.id)
                     citas = dbHelper.obtenerCitasPorFecha(fechaSeleccionada)
-                    Toast.makeText(context, "Cita eliminada", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, "Cita eliminada correctamente.", Toast.LENGTH_SHORT).show()
                     citaAEliminar = null
                 }) {
                     Text("Sí, eliminar", color = MaterialTheme.colorScheme.error)
@@ -172,8 +222,8 @@ fun AdminHomeScreen(navController: NavController) {
                     Text("Cancelar")
                 }
             },
-            title = { Text("¿Eliminar esta cita?") },
-            text = { Text("¿Estás segura de que quieres eliminar esta cita? Esta acción no se puede deshacer.") }
+            title = { Text("Confirmar eliminación") },
+            text = { Text("¿Estás segura de que deseas eliminar esta cita? Esta acción no se puede deshacer.") }
         )
     }
 
@@ -182,7 +232,7 @@ fun AdminHomeScreen(navController: NavController) {
         AlertDialog(
             onDismissRequest = { mostrarDialogoClientes = false },
             confirmButton = {},
-            title = { Text("Selecciona un cliente") },
+            title = { Text("Selecciona un cliente para agendar la cita") },
             text = {
                 Column {
                     clientes.forEach { cliente ->
@@ -194,7 +244,7 @@ fun AdminHomeScreen(navController: NavController) {
                                     mostrarDialogoClientes = false
                                     navController.navigate(NuevaCitaScreenRoute(clienteId = cliente.id))
                                 }
-                                .padding(vertical = 8.dp)
+                                .padding(vertical = 10.dp)
                         )
                     }
                 }

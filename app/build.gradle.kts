@@ -55,6 +55,9 @@ dependencies {
 
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.serialization.json)
+    implementation(libs.androidx.material.icons.extended)
+
+
 
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
