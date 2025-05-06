@@ -56,6 +56,8 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.serialization.json)
     implementation(libs.androidx.material.icons.extended)
+    implementation (libs.androidx.core.splashscreen)
+    implementation ("com.google.android.material:material:1.11.0")
 
 
 

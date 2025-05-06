@@ -1,35 +1,38 @@
 package com.example.pelucita
 
 import android.os.Bundle
-import androidx.activity.ComponentActivity
+import androidx.appcompat.app.AppCompatActivity
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.lifecycle.lifecycleScope
 import com.example.pelucita.Navigation.NavigationWrapper
 import com.example.pelucita.ui.theme.PeluCitaTheme
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
-class MainActivity : ComponentActivity() {
+class MainActivity : AppCompatActivity() {  // Cambiamos a AppCompatActivity
+
+    private var keepSplashVisible = true
+
     override fun onCreate(savedInstanceState: Bundle?) {
+        val splashScreen = installSplashScreen()
+
+        splashScreen.setKeepOnScreenCondition { keepSplashVisible }
+
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
+
+        // Ocultar barra de arriba
+        supportActionBar?.hide()
+
+        // Temporizador para alargar el splash (3.5 segundos)
+        lifecycleScope.launch {
+            delay(3500)
+            keepSplashVisible = false
+        }
+
         setContent {
             PeluCitaTheme {
-                Surface(
-                    modifier = Modifier,
-                    color = MaterialTheme.colorScheme.background
-                ) {
-                    NavigationWrapper(
-                        modifier = Modifier.fillMaxSize()
-                    )
-                }
+                NavigationWrapper()
             }
         }
     }
