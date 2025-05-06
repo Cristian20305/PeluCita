@@ -9,11 +9,16 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -30,6 +35,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.example.pelucita.Data.Model.Cita
 import com.example.pelucita.Data.Repository.DBHelper
+import com.example.pelucita.Utils.HoraDropdown
 import com.example.pelucita.Utils.generarHorasDisponibles
 import java.util.Calendar
 
@@ -88,50 +94,81 @@ fun CitaDetalleScreen(citaId: Int, navController: NavHostController) {
                 .padding(16.dp)
                 .verticalScroll(rememberScrollState())
         ) {
-            Text("Editar Cita", style = MaterialTheme.typography.titleLarge)
+            Text(
+                text = "✏️ Editar Cita",
+                style = MaterialTheme.typography.headlineSmall,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp)
+            )
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            Button(onClick = { datePickerDialog.show() }) {
-                Text(if (fecha.isEmpty()) "Seleccionar fecha" else "Fecha: $fecha")
+            Button(onClick = { datePickerDialog.show() },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Text(
+                    text = if (fecha.isEmpty()) "📅 Seleccionar fecha"
+                    else "📅 Fecha: $fecha",
+                    style = MaterialTheme.typography.bodyLarge
+                )
             }
 
             Spacer(modifier = Modifier.height(8.dp))
 
             if (horasLibres.isNotEmpty()) {
-                Text("Selecciona una hora", style = MaterialTheme.typography.titleMedium)
-
+                // Divimos las horas en dos grupos mañanas y tardes
                 val (manana, tarde) = horasLibres.partition { it < "15:00" }
+                // Ponemos emoji para saber si es mañana o tarde
+                val horasConEtiqueta = manana.map { "🌅 $it" } + tarde.map { "🌇 $it" }
 
-                Text("Turno mañana", style = MaterialTheme.typography.labelMedium)
-                HoraListaRadio(horas = manana, horaSeleccionada = horaSeleccionada) {
-                    horaSeleccionada = it
-                }
+                // El desplegable para mostrar la hora y eligarla
+                HoraDropdown(
+                    label = "Selecciona una hora disponible",
+                    horas = horasConEtiqueta,                                      // Cogemos la lista con las horas que tiene emoji
+                    horaSeleccionada = horaSeleccionada,                           // Hora actual selecionada
+                    onHoraSeleccionada = { horaSeleccionada = it.takeLast(5) }  // Solo la hora limpia nos la guardamos
+                )
 
-                Spacer(modifier = Modifier.height(8.dp))
-
-                Text("Turno tarde", style = MaterialTheme.typography.labelMedium)
-                HoraListaRadio(horas = tarde, horaSeleccionada = horaSeleccionada) {
-                    horaSeleccionada = it
-                }
             } else if (fecha.isNotEmpty()) {
-                Text("No hay horas disponibles", color = MaterialTheme.colorScheme.error)
+                Text(
+                    "⚠️ No hay horas disponibles",
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.padding(top = 8.dp)
+                )
             }
+
 
             Spacer(modifier = Modifier.height(8.dp))
 
+            // Escribimos el servicio que queremos o necesitamos
             OutlinedTextField(
                 value = servicio,
                 onValueChange = { servicio = it },
-                label = { Text("Servicio") },
-                modifier = Modifier.fillMaxWidth()
+                label = { Text("✂️ Servicio") },
+                placeholder = { Text("Ej: Corte de pelo, peinado...") },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp),
+                shape = RoundedCornerShape(12.dp)
             )
 
+
+            // Texto para el nombre del peluquero
             OutlinedTextField(
                 value = peluquero,
                 onValueChange = { peluquero = it },
-                label = { Text("Peluquero (opcional)") },
-                modifier = Modifier.fillMaxWidth()
+                label = { Text("💇 Peluquero (opcional)") },
+                placeholder = { Text("Ej: María, Juan...") },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp),
+                shape = RoundedCornerShape(12.dp)
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -147,12 +184,16 @@ fun CitaDetalleScreen(citaId: Int, navController: NavHostController) {
                         )
                         dbHelper.actualizarCita(citaEditada)
                         Toast.makeText(context, "Cita actualizada", Toast.LENGTH_SHORT).show()
+                        // Volvemos atras al actualizar
+                        navController.popBackStack()
 
                     } else {
                         Toast.makeText(context, "Completa todos los campos obligatorios", Toast.LENGTH_SHORT).show()
                     }
                 },
                 modifier = Modifier.fillMaxWidth()
+                    .padding(vertical = 16.dp),
+                    shape = RoundedCornerShape(12.dp)
             ) {
                 Text("Guardar cambios")
             }

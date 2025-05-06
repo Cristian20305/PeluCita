@@ -31,7 +31,13 @@ fun ClienteHomeScreen(
 
     Box(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.padding(16.dp)) {
-            Text("Mis Citas", style = MaterialTheme.typography.titleLarge)
+
+            Text(
+                "📋 Mis Citas",
+                style = MaterialTheme.typography.headlineSmall,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.padding(vertical = 8.dp)
+            )
 
             Spacer(modifier = Modifier.height(8.dp))
 
