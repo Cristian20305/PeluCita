@@ -5,6 +5,8 @@ import android.content.Context
 import android.database.Cursor
 import com.example.pelucita.Data.Database.PeluCitaDatabase
 import com.example.pelucita.Data.Model.Cita
+import com.example.pelucita.Data.Model.Peluquero
+import com.example.pelucita.Data.Model.Servicio
 import com.example.pelucita.Data.Model.Usuario
 
 class DBHelper(context: Context) {
@@ -167,6 +169,31 @@ class DBHelper(context: Context) {
         cursor.close()
         return lista
     }
+
+    fun obtenerTodosLosPeluqueros(): List<Peluquero> {
+        val peluqueros = mutableListOf<Peluquero>()
+        val cursor = db.rawQuery("SELECT id, nombre FROM peluqueros", null)
+        while (cursor.moveToNext()) {
+            val id = cursor.getInt(0)
+            val nombre = cursor.getString(1)
+            peluqueros.add(Peluquero(id, nombre))
+        }
+        cursor.close()
+        return peluqueros
+    }
+
+    fun obtenerTodosLosServicios(): List<Servicio> {
+        val servicios = mutableListOf<Servicio>()
+        val cursor = db.rawQuery("SELECT id, nombre FROM servicios", null)
+        while (cursor.moveToNext()) {
+            val id = cursor.getInt(0)
+            val nombre = cursor.getString(1)
+            servicios.add(Servicio(id, nombre))
+        }
+        cursor.close()
+        return servicios
+    }
+
 
 
 }

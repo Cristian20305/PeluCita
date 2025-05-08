@@ -19,6 +19,8 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -27,6 +29,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -34,16 +37,28 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.example.pelucita.Data.Model.Cita
+import com.example.pelucita.Data.Model.Peluquero
+import com.example.pelucita.Data.Model.Servicio
 import com.example.pelucita.Data.Repository.DBHelper
 import com.example.pelucita.Utils.HoraDropdown
 import com.example.pelucita.Utils.generarHorasDisponibles
 import java.util.Calendar
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CitaDetalleScreen(citaId: Int, navController: NavHostController) {
     val context = LocalContext.current
     val dbHelper = remember { DBHelper(context) }
     val activity = LocalContext.current as? Activity
+
+
+    // Servios obtenidos de base de datos
+    var servicios by remember { mutableStateOf(emptyList<Servicio>()) }
+    var expandedServicio by rememberSaveable { mutableStateOf(false) }
+
+    // Peluqueros obtenidos de base de datos
+    var peluqueros by remember { mutableStateOf(emptyList<Peluquero>()) }
+    var expandedPeluquero by rememberSaveable { mutableStateOf(false) }
 
     var cita by remember { mutableStateOf<Cita?>(null) }
 
@@ -146,30 +161,74 @@ fun CitaDetalleScreen(citaId: Int, navController: NavHostController) {
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Escribimos el servicio que queremos o necesitamos
-            OutlinedTextField(
-                value = servicio,
-                onValueChange = { servicio = it },
-                label = { Text("✂️ Servicio") },
-                placeholder = { Text("Ej: Corte de pelo, peinado...") },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp),
-                shape = RoundedCornerShape(12.dp)
-            )
+            // Dropdown para seleccionar servicio
+            ExposedDropdownMenuBox(
+                expanded = expandedServicio,
+                onExpandedChange = { expandedServicio = !expandedServicio },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                // Escribimos el servicio que queremos o necesitamos
+                OutlinedTextField(
+                    value = servicio,
+                    onValueChange = {},
+                    label = { Text("✂️ Servicio") },
+                    placeholder = { Text("Ej: Corte de pelo, peinado...") },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp),
+                    shape = RoundedCornerShape(12.dp)
+                )
+                ExposedDropdownMenu(
+                    expanded = expandedServicio,
+                    onDismissRequest = { expandedServicio = false }
+                ) {
+                    servicios.forEach { serv ->
+                        DropdownMenuItem(
+                            text = { Text(serv.nombre) },
+                            onClick = {
+                                servicio = serv.nombre
+                                expandedServicio = false
+                            }
+                        )
+                    }
+                }
+            }
+
+            // Dropdown para seleccionar peluquero (opcional)
+            ExposedDropdownMenuBox(
+                expanded = expandedPeluquero,
+                onExpandedChange = { expandedPeluquero = !expandedPeluquero },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                // Texto para el nombre del peluquero
+                OutlinedTextField(
+                    value = peluquero,
+                    onValueChange = { peluquero = it },
+                    label = { Text("💇 Peluquero (opcional)") },
+                    placeholder = { Text("Ej: María, Juan...") },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp),
+                    shape = RoundedCornerShape(12.dp)
+                )
+                ExposedDropdownMenu(
+                    expanded = expandedPeluquero,
+                    onDismissRequest = { expandedPeluquero = false }
+                ) {
+                    peluqueros.forEach { pelu ->
+                        DropdownMenuItem(
+                            text = { Text(pelu.nombre) },
+                            onClick = {
+                                peluquero = pelu.nombre
+                                expandedPeluquero = false
+                            }
+                        )
+                    }
+                }
+            }
 
 
-            // Texto para el nombre del peluquero
-            OutlinedTextField(
-                value = peluquero,
-                onValueChange = { peluquero = it },
-                label = { Text("💇 Peluquero (opcional)") },
-                placeholder = { Text("Ej: María, Juan...") },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp),
-                shape = RoundedCornerShape(12.dp)
-            )
+
 
             Spacer(modifier = Modifier.height(16.dp))
 

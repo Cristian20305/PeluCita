@@ -237,7 +237,7 @@ fun AdminHomeScreen(navController: NavController) {
                 Column {
                     clientes.forEach { cliente ->
                         Text(
-                            text = "${cliente.nombre} (ID: ${cliente.id})",
+                            text = cliente.nombre,
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clickable {
