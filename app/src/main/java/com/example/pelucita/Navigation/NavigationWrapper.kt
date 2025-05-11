@@ -2,6 +2,7 @@ package com.example.pelucita.Navigation
 
 import AdminHomeScreen
 import ClienteHomeScreen
+import NuevaCitaScreen
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost

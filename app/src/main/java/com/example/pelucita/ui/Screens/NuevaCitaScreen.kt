@@ -1,48 +1,28 @@
-package com.example.pelucita.ui.Screens
-
-import android.widget.Toast
 import android.app.DatePickerDialog
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.padding
+import android.widget.Toast
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.RadioButton
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.max
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
+import androidx.work.workDataOf
 import com.example.pelucita.Data.Model.Cita
 import com.example.pelucita.Data.Model.Peluquero
 import com.example.pelucita.Data.Model.Servicio
 import com.example.pelucita.Data.Repository.DBHelper
+import com.example.pelucita.Utils.CitaReminderWorker
 import com.example.pelucita.Utils.HoraDropdown
 import com.example.pelucita.Utils.generarHorasDisponibles
-import java.util.Calendar
+import java.text.SimpleDateFormat
+import java.util.*
+import java.util.concurrent.TimeUnit
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -54,7 +34,6 @@ fun NuevaCitaScreen(
     val dbHelper = remember { DBHelper(context) }
 
     var fecha by remember { mutableStateOf("") }
-    var hora by remember { mutableStateOf("") }
     var horaSeleccionada by remember { mutableStateOf("") }
     var servicio by remember { mutableStateOf("") }
 
@@ -69,7 +48,7 @@ fun NuevaCitaScreen(
     var peluquero by remember { mutableStateOf("") }
     var horasLibres by remember { mutableStateOf(emptyList<String>()) }
 
-
+    // Cargamos servicios y peluqueros al inicio
     LaunchedEffect(Unit) {
         servicios = dbHelper.obtenerTodosLosServicios()
         peluqueros = dbHelper.obtenerTodosLosPeluqueros()
@@ -82,31 +61,28 @@ fun NuevaCitaScreen(
         { _, year, month, day ->
             val selectedDate = String.format("%04d-%02d-%02d", year, month + 1, day)
             fecha = selectedDate
-
-            // cargar horas libres
-            val todasLasHoras = generarHorasDisponibles()
             val ocupadas = dbHelper.obtenerCitasPorFecha(selectedDate).map { it.hora }
-            horasLibres = todasLasHoras.filterNot { it in ocupadas }
-            horaSeleccionada = "" // resetear
+            horasLibres = generarHorasDisponibles().filterNot { it in ocupadas }
+            horaSeleccionada = "" // Reset
         },
         calendar.get(Calendar.YEAR),
         calendar.get(Calendar.MONTH),
         calendar.get(Calendar.DAY_OF_MONTH)
     )
 
-    Column(Modifier
-        .fillMaxSize()
-        .padding(16.dp)
-        .verticalScroll(rememberScrollState())) {
-
+    Column(
+        Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+            .verticalScroll(rememberScrollState())
+    ) {
         Text(
             "🗓️ Reservar nueva cita",
             style = MaterialTheme.typography.headlineSmall,
             color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 8.dp)
+            modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)
         )
+
         Spacer(modifier = Modifier.height(8.dp))
 
 
@@ -114,34 +90,28 @@ fun NuevaCitaScreen(
         // Boton de fecha mas llamativo
         Button(
             onClick = { datePickerDialog.show() },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 8.dp),
+            modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
             shape = RoundedCornerShape(12.dp)
         ) {
             Text(
-                if (fecha.isEmpty()) "📅 Seleccionar fecha"
-                else "📅 Fecha: $fecha",
+                if (fecha.isEmpty()) "📅 Seleccionar fecha" else "📅 Fecha: $fecha",
                 style = MaterialTheme.typography.bodyLarge
             )
         }
-
-        Spacer(modifier = Modifier.height(8.dp))
 
         if (horasLibres.isNotEmpty()) {
             Spacer(modifier = Modifier.height(8.dp))
 
             // Divimos las horas en dos grupos mañanas y tardes
             val (manana, tarde) = horasLibres.partition { it < "15:00" }
-            // Divimos las horas en dos grupos mañanas y tardes
             val horasConEtiqueta = manana.map { "🌅 $it" } + tarde.map { "🌇 $it" }
 
             // El desplegable para mostrar la hora y eligarla
             HoraDropdown(
                 label = "Selecciona una hora disponible",
-                horas = horasConEtiqueta,                                      // Cogemos la lista con las horas que tiene emoji
-                horaSeleccionada = horaSeleccionada,                           // Hora actual selecionada
-                onHoraSeleccionada = { horaSeleccionada = it.takeLast(5) } // Solo la hora limpia nos la guardamos
+                horas = horasConEtiqueta,
+                horaSeleccionada = horaSeleccionada,
+                onHoraSeleccionada = { horaSeleccionada = it.takeLast(5) }
             )
 
         } else if (fecha.isNotEmpty()) {
@@ -153,10 +123,10 @@ fun NuevaCitaScreen(
             )
         }
 
-        // Dropdown para seleccionar servicio
+        // Dropdown para servicio
         ExposedDropdownMenuBox(
             expanded = expandedServicio,
-            onExpandedChange = { expandedServicio = !expandedServicio},
+            onExpandedChange = { expandedServicio = !expandedServicio },
             modifier = Modifier.fillMaxWidth()
         ) {
             // Campo de servicio
@@ -168,14 +138,14 @@ fun NuevaCitaScreen(
                 trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedServicio) },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .menuAnchor().fillMaxWidth()
+                    .menuAnchor()
                     .padding(vertical = 8.dp),
                 shape = RoundedCornerShape(12.dp)
             )
             ExposedDropdownMenu(
-              expanded = expandedServicio,
-                onDismissRequest = {expandedServicio=false}
-            ){
+                expanded = expandedServicio,
+                onDismissRequest = { expandedServicio = false }
+            ) {
                 servicios.forEach { serv ->
                     DropdownMenuItem(
                         text = { Text(serv.nombre) },
@@ -188,11 +158,10 @@ fun NuevaCitaScreen(
             }
         }
 
-        // Dropdown para seleccionar peluquero (opcional)
-
+        // Dropdown para peluquero (opcional)
         ExposedDropdownMenuBox(
             expanded = expandedPeluquero,
-            onExpandedChange = { expandedPeluquero =! expandedPeluquero },
+            onExpandedChange = { expandedPeluquero = !expandedPeluquero },
             modifier = Modifier.fillMaxWidth()
         ) {
             // Campo de peluquero (opcional)
@@ -201,16 +170,16 @@ fun NuevaCitaScreen(
                 onValueChange = { },
                 label = { Text("💇 Peluquero (opcional)") },
                 placeholder = { Text("Ej: María, Juan...") },
-                trailingIcon = {ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedPeluquero)},
+                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedPeluquero) },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .menuAnchor().fillMaxWidth()
+                    .menuAnchor()
                     .padding(vertical = 8.dp),
                 shape = RoundedCornerShape(12.dp)
             )
             ExposedDropdownMenu(
                 expanded = expandedPeluquero,
-                onDismissRequest = {expandedPeluquero=false}
+                onDismissRequest = { expandedPeluquero = false }
             ) {
                 peluqueros.forEach { pelu ->
                     DropdownMenuItem(
@@ -233,22 +202,54 @@ fun NuevaCitaScreen(
             onClick = {
                 if (fecha.isNotEmpty() && horaSeleccionada.isNotEmpty() && servicio.isNotEmpty()) {
                     val nuevaCita = Cita(
-                        id = 0, // Auto-generado en la base de datos
+                        id = 0,
                         clienteId = clienteId,
                         fecha = fecha,
                         hora = horaSeleccionada,
                         servicio = servicio,
                         peluquero = if (peluquero.isBlank()) null else peluquero
                     )
-                    dbHelper.crearCita(nuevaCita)
-                    Toast.makeText(context," Cita guardado", Toast.LENGTH_SHORT).show()
-                    onCitaGuardada() // Volver atrás una vez guardada la cita
+                    val citaId = dbHelper.crearCita(nuevaCita)
+
+                    if (citaId != -1L) {
+                        val citaGuardada = dbHelper.obtenerCitaPorId(citaId.toInt())
+                        citaGuardada?.let {
+                            // Convertir fecha + hora a Date
+                            val citaDateTime = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
+                                .parse("${it.fecha} ${it.hora}")
+
+                            citaDateTime?.let { date ->
+                                // Aqui funciona normal te avisa una hora antes
+                                //val reminderTime = date.time - 60 * 60 * 1000 // 1h antes
+                                //val delay = reminderTime - System.currentTimeMillis()
+                                // Prueba de 30 segundos para ver si funciona
+                                val delay= 30*1000L
+
+                                if (delay > 0) {
+                                    val workRequest = OneTimeWorkRequestBuilder<CitaReminderWorker>()
+                                        .setInitialDelay(delay, TimeUnit.MILLISECONDS)
+                                        .setInputData(
+                                            workDataOf(
+                                                "citaId" to it.id,
+                                                "fecha" to it.fecha,
+                                                "hora" to it.hora
+                                            )
+                                        )
+                                        .build()
+                                    WorkManager.getInstance(context).enqueue(workRequest)
+                                }
+                            }
+                        }
+                        Toast.makeText(context, "✅ Cita guardada correctamente", Toast.LENGTH_SHORT).show()
+                        onCitaGuardada()
+                    } else {
+                        Toast.makeText(context, "❌ Error al guardar la cita", Toast.LENGTH_SHORT).show()
+                    }
                 } else {
-                    // Mostrar un mensaje de error si faltan campos
-                    Toast.makeText(context, "Por favor complete todos los campos", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, "⚠️ Por favor completa todos los campos", Toast.LENGTH_SHORT).show()
                 }
             },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
                 .fillMaxWidth()
                 .padding(vertical = 8.dp),
             shape = RoundedCornerShape(12.dp)
