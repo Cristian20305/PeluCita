@@ -19,6 +19,7 @@ import com.example.pelucita.Data.Model.Servicio
 import com.example.pelucita.Data.Repository.DBHelper
 import com.example.pelucita.Utils.CitaReminderWorker
 import com.example.pelucita.Utils.HoraDropdown
+import com.example.pelucita.Utils.añadirCitaAlCalendario
 import com.example.pelucita.Utils.generarHorasDisponibles
 import java.text.SimpleDateFormat
 import java.util.*
@@ -47,6 +48,10 @@ fun NuevaCitaScreen(
 
     var peluquero by remember { mutableStateOf("") }
     var horasLibres by remember { mutableStateOf(emptyList<String>()) }
+
+    var mostrarDialogoCalendario by remember { mutableStateOf(false) }
+    var citaRecienGuardada by remember { mutableStateOf<Cita?>(null) }
+
 
     // Cargamos servicios y peluqueros al inicio
     LaunchedEffect(Unit) {
@@ -80,17 +85,20 @@ fun NuevaCitaScreen(
             "🗓️ Reservar nueva cita",
             style = MaterialTheme.typography.headlineSmall,
             color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 8.dp)
         )
 
         Spacer(modifier = Modifier.height(8.dp))
 
 
-
         // Boton de fecha mas llamativo
         Button(
             onClick = { datePickerDialog.show() },
-            modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 8.dp),
             shape = RoundedCornerShape(12.dp)
         ) {
             Text(
@@ -215,38 +223,51 @@ fun NuevaCitaScreen(
                         val citaGuardada = dbHelper.obtenerCitaPorId(citaId.toInt())
                         citaGuardada?.let {
                             // Convertir fecha + hora a Date
-                            val citaDateTime = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
-                                .parse("${it.fecha} ${it.hora}")
+                            val citaDateTime =
+                                SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
+                                    .parse("${it.fecha} ${it.hora}")
 
                             citaDateTime?.let { date ->
                                 // Aqui funciona normal te avisa una hora antes
                                 //val reminderTime = date.time - 60 * 60 * 1000 // 1h antes
                                 //val delay = reminderTime - System.currentTimeMillis()
                                 // Prueba de 30 segundos para ver si funciona
-                                val delay= 30*1000L
+                                val delay = 30 * 1000L
 
                                 if (delay > 0) {
-                                    val workRequest = OneTimeWorkRequestBuilder<CitaReminderWorker>()
-                                        .setInitialDelay(delay, TimeUnit.MILLISECONDS)
-                                        .setInputData(
-                                            workDataOf(
-                                                "citaId" to it.id,
-                                                "fecha" to it.fecha,
-                                                "hora" to it.hora
+                                    val workRequest =
+                                        OneTimeWorkRequestBuilder<CitaReminderWorker>()
+                                            .setInitialDelay(delay, TimeUnit.MILLISECONDS)
+                                            .setInputData(
+                                                workDataOf(
+                                                    "citaId" to it.id,
+                                                    "fecha" to it.fecha,
+                                                    "hora" to it.hora
+                                                )
                                             )
-                                        )
-                                        .build()
+                                            .build()
                                     WorkManager.getInstance(context).enqueue(workRequest)
                                 }
                             }
+
+                            Toast.makeText(
+                                context,
+                                "✅ Cita guardada correctamente",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                            citaRecienGuardada = it
+                            mostrarDialogoCalendario = true
                         }
-                        Toast.makeText(context, "✅ Cita guardada correctamente", Toast.LENGTH_SHORT).show()
-                        onCitaGuardada()
                     } else {
-                        Toast.makeText(context, "❌ Error al guardar la cita", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, "❌ Error al guardar la cita", Toast.LENGTH_SHORT)
+                            .show()
                     }
                 } else {
-                    Toast.makeText(context, "⚠️ Por favor completa todos los campos", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        context,
+                        "⚠️ Por favor completa todos los campos",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
             },
             modifier = Modifier
@@ -256,5 +277,32 @@ fun NuevaCitaScreen(
         ) {
             Text("Guardar cita")
         }
+
+        // Dialogo para preguntar si quiere añadir la cita al calendario
+        if (mostrarDialogoCalendario && citaRecienGuardada != null) {
+            AlertDialog(
+                onDismissRequest = { mostrarDialogoCalendario = false },
+                title = { Text("Añadir al calendario") },
+                text = { Text("¿Quieres añadir esta cita al calendario de tu móvil?") },
+                confirmButton = {
+                    TextButton(onClick = {
+                        añadirCitaAlCalendario(context, citaRecienGuardada!!)
+                        mostrarDialogoCalendario = false
+                        onCitaGuardada()
+                    }) {
+                        Text("Sí")
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = {
+                        mostrarDialogoCalendario = false
+                        onCitaGuardada()
+                    }) {
+                        Text("No")
+                    }
+                }
+            )
+        }
+
     }
 }

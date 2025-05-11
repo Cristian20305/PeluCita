@@ -41,6 +41,7 @@ import com.example.pelucita.Data.Model.Peluquero
 import com.example.pelucita.Data.Model.Servicio
 import com.example.pelucita.Data.Repository.DBHelper
 import com.example.pelucita.Utils.HoraDropdown
+import com.example.pelucita.Utils.añadirCitaAlCalendario
 import com.example.pelucita.Utils.generarHorasDisponibles
 import java.util.Calendar
 
@@ -120,7 +121,8 @@ fun CitaDetalleScreen(citaId: Int, navController: NavHostController) {
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            Button(onClick = { datePickerDialog.show() },
+            Button(
+                onClick = { datePickerDialog.show() },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 8.dp),
@@ -146,7 +148,9 @@ fun CitaDetalleScreen(citaId: Int, navController: NavHostController) {
                     label = "Selecciona una hora disponible",
                     horas = horasConEtiqueta,                                      // Cogemos la lista con las horas que tiene emoji
                     horaSeleccionada = horaSeleccionada,                           // Hora actual selecionada
-                    onHoraSeleccionada = { horaSeleccionada = it.takeLast(5) }  // Solo la hora limpia nos la guardamos
+                    onHoraSeleccionada = {
+                        horaSeleccionada = it.takeLast(5)
+                    }  // Solo la hora limpia nos la guardamos
                 )
 
             } else if (fecha.isNotEmpty()) {
@@ -247,14 +251,29 @@ fun CitaDetalleScreen(citaId: Int, navController: NavHostController) {
                         navController.popBackStack()
 
                     } else {
-                        Toast.makeText(context, "Completa todos los campos obligatorios", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(
+                            context,
+                            "Completa todos los campos obligatorios",
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
                 },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
                     .padding(vertical = 16.dp),
-                    shape = RoundedCornerShape(12.dp)
+                shape = RoundedCornerShape(12.dp)
             ) {
                 Text("Guardar cambios")
+            }
+            Button(
+                onClick = {
+                    añadirCitaAlCalendario(context, cita!!)
+                },
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp)
+
+            ) {
+                Text("📆 Añadir al calendario")
             }
         }
     } ?: Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {

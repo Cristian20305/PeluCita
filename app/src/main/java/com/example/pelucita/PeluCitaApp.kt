@@ -38,7 +38,7 @@ class MainActivity : AppCompatActivity() {  // Cambiamos a AppCompatActivity
 
         // Temporizador para alargar el splash (3.5 segundos)
         lifecycleScope.launch {
-            delay(3500)
+            delay(2000)
             keepSplashVisible = false
         }
 

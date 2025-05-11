@@ -113,6 +113,7 @@ class DBHelper(context: Context) {
         cursor.close()
         return lista
     }
+
     // Obtenemos citas por esas horas que pasamis
     fun obtenerCitasPorFecha(fecha: String): List<Cita> {
         val lista = mutableListOf<Cita>()
@@ -194,6 +195,30 @@ class DBHelper(context: Context) {
         return servicios
     }
 
+    fun obtenerHistorialCitas(limit: Int = 10): List<Cita> {
+        val lista = mutableListOf<Cita>()
+        val cursor = db.rawQuery(
+            "SELECT * FROM citas ORDER BY fecha DESC, hora DESC LIMIT ?",
+            arrayOf(limit.toString())
+        )
+        while (cursor.moveToNext()) {
+            lista.add(cursorToCita(cursor))
+        }
+        cursor.close()
+        return lista
+    }
+
+    // Convierte un cursor en un objeto Cita
+    private fun cursorToCita(cursor: Cursor): Cita {
+        return Cita(
+            id = cursor.getInt(cursor.getColumnIndexOrThrow("id")),
+            clienteId = cursor.getInt(cursor.getColumnIndexOrThrow("cliente_id")),
+            fecha = cursor.getString(cursor.getColumnIndexOrThrow("fecha")),
+            hora = cursor.getString(cursor.getColumnIndexOrThrow("hora")),
+            servicio = cursor.getString(cursor.getColumnIndexOrThrow("servicio")),
+            peluquero = cursor.getString(cursor.getColumnIndexOrThrow("peluquero"))
+        )
+    }
 
 
 }

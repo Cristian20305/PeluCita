@@ -1,5 +1,6 @@
 import android.app.DatePickerDialog
 import android.widget.Toast
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -45,6 +46,16 @@ fun AdminHomeScreen(navController: NavController) {
     // Mostrar diálogo para elegir cliente
     var mostrarDialogoClientes by remember { mutableStateOf(false) }
 
+    // Campo de búsqueda para filtrar citas
+    var textoBusqueda by remember { mutableStateOf("") }
+
+    // Citas filtradas por servicio y peluquero
+    val citasFiltradas = if (textoBusqueda.isBlank()) citas else
+        citas.filter {
+            it.servicio.contains(textoBusqueda, ignoreCase = true) ||
+                    it.peluquero?.contains(textoBusqueda, ignoreCase = true) == true
+        }
+
     // Objeto calendario para el DatePicker
     val calendar = Calendar.getInstance()
 
@@ -70,9 +81,13 @@ fun AdminHomeScreen(navController: NavController) {
     ) {
         // Título de la pantalla
         Text(
-            "Gestión de citas",
-            style = MaterialTheme.typography.titleLarge,
-            fontSize = 24.sp
+            "📋 Gestión de citas",
+            style = MaterialTheme.typography.headlineSmall,
+            color = MaterialTheme.colorScheme.primary,
+            fontSize = 24.sp,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 8.dp)
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -88,6 +103,18 @@ fun AdminHomeScreen(navController: NavController) {
                 else "📅 Fecha seleccionada: $fechaSeleccionada"
             )
         }
+
+
+
+        OutlinedTextField(
+            value = textoBusqueda,
+            onValueChange = { textoBusqueda = it },
+            label = { Text("🔍 Buscar por servicio o peluquero") },
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Spacer(modifier = Modifier.height(12.dp))
+
 
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -117,73 +144,78 @@ fun AdminHomeScreen(navController: NavController) {
                     modifier = Modifier.padding(top = 16.dp)
                 )
             } else {
-                // Lista de citas en ese día
-                LazyColumn {
-                    items(citas) { cita ->
-                        // Tarjeta con los datos de la cita
-                        Card(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 8.dp),
-                            elevation = CardDefaults.cardElevation(6.dp),
-                            shape = RoundedCornerShape(16.dp),
-                            // 🎨 Aplicamos colores personalizados desde el theme
-                            colors = CardDefaults.cardColors(
-                                containerColor = MaterialTheme.colorScheme.surfaceVariant
-                            )
-                        ) {
-                            Column(modifier = Modifier.padding(16.dp)) {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Icon(Icons.Default.Schedule, contentDescription = null)
-                                    Spacer(modifier = Modifier.width(8.dp))
-                                    Text("Hora: ${cita.hora}")
-                                }
-                                Spacer(modifier = Modifier.height(8.dp))
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Icon(Icons.Default.ContentCut, contentDescription = null)
-                                    Spacer(modifier = Modifier.width(8.dp))
-                                    Text("Servicio: ${cita.servicio}")
-                                }
-                                Spacer(modifier = Modifier.height(8.dp))
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Icon(Icons.Default.Person, contentDescription = null)
-                                    Spacer(modifier = Modifier.width(8.dp))
-                                    Text("Peluquero: ${cita.peluquero ?: "No asignado"}")
-                                }
-                                Spacer(modifier = Modifier.height(8.dp))
-                                Text("ID Cliente: ${cita.clienteId}")
-
-                                Spacer(modifier = Modifier.height(16.dp))
-
-                                // Botones en fila: Editar y Eliminar
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.SpaceBetween
-                                ) {
-                                    // Botón para editar la cita
-                                    Button(
-                                        onClick = {
-                                            // Navegamos a la pantalla de detalle para editar la cita
-                                            navController.navigate(CitaDetalleRoute(cita.id))
-                                        },
-                                        modifier = Modifier.weight(1f),
-                                        shape = RoundedCornerShape(10.dp)
-                                    ) {
-                                        Text("Editar cita")
+                // Lista de citas en ese día con animacion para que quede mas bonito
+                AnimatedVisibility(visible = citasFiltradas.isNotEmpty()) {
+                    LazyColumn {
+                        items(citasFiltradas) { cita ->
+                            // Tarjeta con los datos de la cita
+                            Card(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 8.dp),
+                                elevation = CardDefaults.cardElevation(6.dp),
+                                shape = RoundedCornerShape(16.dp),
+                                // Aplicamos colores personalizados desde el theme
+                                colors = CardDefaults.cardColors(
+                                    containerColor = MaterialTheme.colorScheme.surfaceVariant
+                                )
+                            ) {
+                                Column(modifier = Modifier.padding(16.dp)) {
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Icon(Icons.Default.Schedule, contentDescription = null)
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                        Text("Hora: ${cita.hora}")
                                     }
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Icon(Icons.Default.ContentCut, contentDescription = null)
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                        Text("Servicio: ${cita.servicio}")
+                                    }
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Icon(Icons.Default.Person, contentDescription = null)
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                        Text("Peluquero: ${cita.peluquero ?: "No asignado"}")
+                                    }
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                    Text("ID Cliente: ${cita.clienteId}")
 
-                                    Spacer(modifier = Modifier.width(12.dp))
+                                    Spacer(modifier = Modifier.height(16.dp))
 
-                                    // Botón para eliminar con confirmación
-                                    Button(
-                                        onClick = { citaAEliminar = cita },
-                                        colors = ButtonDefaults.buttonColors(
-                                            containerColor = MaterialTheme.colorScheme.error
-                                        ),
-                                        modifier = Modifier.weight(1f),
-                                        shape = RoundedCornerShape(10.dp)
+                                    // Botones en fila: Editar y Eliminar
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceBetween
                                     ) {
-                                        Text("Eliminar cita", color = MaterialTheme.colorScheme.onError)
+                                        // Botón para editar la cita
+                                        Button(
+                                            onClick = {
+                                                // Navegamos a la pantalla de detalle para editar la cita
+                                                navController.navigate(CitaDetalleRoute(cita.id))
+                                            },
+                                            modifier = Modifier.weight(1f),
+                                            shape = RoundedCornerShape(10.dp)
+                                        ) {
+                                            Text("Editar cita")
+                                        }
+
+                                        Spacer(modifier = Modifier.width(12.dp))
+
+                                        // Botón para eliminar con confirmación
+                                        Button(
+                                            onClick = { citaAEliminar = cita },
+                                            colors = ButtonDefaults.buttonColors(
+                                                containerColor = MaterialTheme.colorScheme.error
+                                            ),
+                                            modifier = Modifier.weight(1f),
+                                            shape = RoundedCornerShape(10.dp)
+                                        ) {
+                                            Text(
+                                                "Eliminar cita",
+                                                color = MaterialTheme.colorScheme.onError
+                                            )
+                                        }
                                     }
                                 }
                             }
@@ -193,12 +225,32 @@ fun AdminHomeScreen(navController: NavController) {
             }
         } else {
             // Si aún no se ha seleccionado una fecha
-            Text(
+            /*Text(
                 "Por favor, selecciona una fecha para visualizar las citas programadas.",
                 fontSize = 16.sp,
                 color = MaterialTheme.colorScheme.outline,
                 modifier = Modifier.padding(top = 16.dp)
-            )
+            )*/
+
+            // Mostramos a traves de una consulta las ultimas 10 citas que tenga desde el dia de hoy en
+            // orden ascendente
+
+            val historial = dbHelper.obtenerHistorialCitas(limit = 10)
+
+            if (historial.isNotEmpty()) {
+                Text("📜 Historial de últimas citas:", fontSize = 16.sp)
+                Spacer(modifier = Modifier.height(8.dp))
+
+                LazyColumn {
+                    // Cita de esa fecha, hora, servicio
+                    items(historial) { cita ->
+                        Text("• ${cita.fecha} - ${cita.hora} - ${cita.servicio}")
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+
         }
     }
 
@@ -211,7 +263,8 @@ fun AdminHomeScreen(navController: NavController) {
                     // Eliminamos la cita y actualizamos la lista
                     dbHelper.eliminarCita(cita.id)
                     citas = dbHelper.obtenerCitasPorFecha(fechaSeleccionada)
-                    Toast.makeText(context, "Cita eliminada correctamente.", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, "Cita eliminada correctamente.", Toast.LENGTH_SHORT)
+                        .show()
                     citaAEliminar = null
                 }) {
                     Text("Sí, eliminar", color = MaterialTheme.colorScheme.error)
