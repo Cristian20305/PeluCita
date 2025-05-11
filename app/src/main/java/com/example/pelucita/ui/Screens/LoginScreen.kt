@@ -50,7 +50,14 @@ fun LoginScreen(
     ) {
 
         // Texto de inicio de sesión
-        Text("Iniciar Sesión", style = MaterialTheme.typography.headlineSmall)
+        Text(
+            text = "🔐 Iniciar Sesión",
+            style = MaterialTheme.typography.headlineSmall,
+            color = MaterialTheme.colorScheme.primary,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 8.dp)
+        )
 
         Spacer(modifier = Modifier.height(16.dp))
 
