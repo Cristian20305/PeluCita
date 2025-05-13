@@ -10,6 +10,10 @@ import androidx.work.Worker
 import androidx.work.WorkerParameters
 import com.example.pelucita.R
 
+// Funciones para el control de notificaciones de forma local o de manera por base de datos en la nube
+
+
+// Funcion para controlar las notificaciones pero solo para forma local con nuestra base de datos
 class CitaReminderWorker(
     appContext: Context,
     workerParams: WorkerParameters

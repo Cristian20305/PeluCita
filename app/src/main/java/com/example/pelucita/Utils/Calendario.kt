@@ -3,10 +3,15 @@ package com.example.pelucita.Utils
 import android.content.Context
 import android.content.Intent
 import android.provider.CalendarContract
-import com.example.pelucita.Data.Model.Cita
+import com.example.pelucita.Data.model.Cita
 import java.text.SimpleDateFormat
 import java.util.*
 
+
+// Funciones de calendarios aqui las tendremos para mejor organizacion
+
+
+// Añadimos al calendario a traves de un intent la cita como recordatorio
 fun añadirCitaAlCalendario(context: Context, cita: Cita) {
     val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
     val fechaHora = sdf.parse("${cita.fecha} ${cita.hora}") ?: return

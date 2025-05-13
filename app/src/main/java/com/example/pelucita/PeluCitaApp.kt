@@ -36,7 +36,7 @@ class MainActivity : AppCompatActivity() {  // Cambiamos a AppCompatActivity
         // Ocultar barra de arriba
         supportActionBar?.hide()
 
-        // Temporizador para alargar el splash (3.5 segundos)
+        // Temporizador para alargar el splash (2 segundos)
         lifecycleScope.launch {
             delay(2000)
             keepSplashVisible = false

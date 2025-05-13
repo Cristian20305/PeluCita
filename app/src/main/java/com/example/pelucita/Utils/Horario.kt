@@ -12,6 +12,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 
+// En este util no encargamois de horarios para generar horas para consultar o para cuaqluier cosa
+
+
+// Generamos las horas que estan disponibles cada media hora y con un horrario que el cliente nos pide
 fun generarHorasDisponibles(): List<String> {
     val horasDisponibles = mutableListOf<String>()
 
@@ -43,7 +47,7 @@ fun generarHorasDisponibles(): List<String> {
 }
 
 
-
+// Mostramos las horas a traves de un DROPDOWM menu
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HoraDropdown(

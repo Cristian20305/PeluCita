@@ -8,7 +8,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.pelucita.ui.Screens.*
+import com.example.pelucita.ui.screens.*
 
 @Composable
 fun NavigationWrapper(modifier: Modifier = Modifier) {
