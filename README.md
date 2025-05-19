@@ -1,168 +1,181 @@
 # 📱 PeluCita – App de Gestión de Citas para Peluquerías
 
 ## Índice
-
-1. **Especificación de la aplicación**
-   - 1.1. Definición de la aplicación
-   - 1.2. Catálogo de requisitos
-     - 1.2.1. Requisitos Funcionales
-     - 1.2.2. Requisitos No Funcionales
-2. **Desarrollo de la aplicación**
-   - 2.1. Mapa de navegación
-   - 2.2. Interfaz gráfica
-   - 2.3. Almacenamiento de la información
-3. **Construcción de la aplicación**
-   - 3.1. Tecnologías seleccionadas
-   - 3.2. Herramientas utilizadas
-4. **Implantación o publicación**
-   - 4.1. Recursos físicos y lógicos
-   - 4.2. Procedimiento de implantación
+1. [Especificación de la aplicación](#especificación-de-la-aplicación)
+   - [Definición de la aplicación](#definición-de-la-aplicación)
+   - [Catálogo de requisitos](#catálogo-de-requisitos)
+2. [Desarrollo de la aplicación](#desarrollo-de-la-aplicación)
+   - [Mapa de navegación](#mapa-de-navegación)
+   - [Interfaz gráfica](#interfaz-gráfica)
+   - [Almacenamiento de la información](#almacenamiento-de-la-información)
+3. [Construcción de la aplicación](#construcción-de-la-aplicación)
+   - [Tecnologías seleccionadas](#tecnologías-seleccionadas)
+   - [Herramientas utilizadas](#herramientas-utilizadas)
+4. [Implantación o publicación](#implantación-o-publicación)
+   - [Recursos físicos y lógicos](#recursos-físicos-y-lógicos)
+   - [Procedimiento de implantación](#procedimiento-de-implantación)
 
 ---
 
 ## 1. Especificación de la aplicación
 
-### 1.1. Definición de la aplicación
+### Definición de la aplicación
+**PeluCita** es una app móvil Android desarrollada en **Kotlin** con **Jetpack Compose** que permite la gestión integral de citas en peluquerías. Está dirigida a pequeños y medianos salones que buscan digitalizar sus procesos de reserva.
 
-**PeluCita** es una aplicación móvil desarrollada en **Kotlin** utilizando **Jetpack Compose** para la interfaz de usuario. Su propósito es ofrecer una solución eficiente y moderna para la gestión de citas en peluquerías, permitiendo automatizar procesos como la reserva, modificación o cancelación de turnos, y el manejo de agendas tanto para clientes como para personal.
+### Perfiles de usuario:
+- **Cliente**: Puede consultar disponibilidad, reservar, modificar o cancelar citas y acceder a su historial.
+- **Administrador (peluquero/a)**: Gestiona la agenda, añade/modifica/elimina turnos y consulta información de los clientes.
 
-La aplicación está dirigida a pequeños y medianos salones que buscan digitalizar su sistema de reservas con una interfaz optimizada para Android.
+---
 
-**Perfiles principales:**
+### Catálogo de requisitos
 
-- **Cliente:**  
-  Consultar disponibilidad, reservar, modificar/cancelar citas, y acceder a su historial.
-  
-- **Administrador (peluquero/a):**  
-  Gestionar toda la agenda: añadir, editar, eliminar turnos y consultar datos de clientes.
+#### Requisitos Funcionales
+- RF01: Registro e inicio de sesión con validación de credenciales locales.
+- RF02: Visualización de disponibilidad horaria gestionada por el admin.
+- RF03: Reserva de citas con selección de día, hora, servicio y peluquero.
+- RF04: Cancelación de citas activas y liberación del horario.
+- RF05: Consulta del historial de citas por parte del cliente.
+- RF06: Panel exclusivo para el administrador con gestión total de citas.
+- RF07: Configuración de horarios y bloqueo de días.
+- RF08: Visualización de calendario y detalles de citas programadas.
+- RF09: Recordatorios automáticos mediante notificaciones locales y posibilidad de añadir cita al calendario.
 
-### 1.2. Catálogo de requisitos
-
-#### 1.2.1. Requisitos Funcionales
-
-- **RF01:** Registro e inicio de sesión con validación local.
-- **RF02:** Visualización de disponibilidad horaria gestionada por el administrador.
-- **RF03:** Reserva de citas por parte del cliente.
-- **RF04:** Cancelación de citas activas.
-- **RF05:** Consulta de historial de citas por parte del cliente.
-- **RF06:** Panel exclusivo para la gestión completa de la agenda (admin).
-- **RF07:** Configuración de horarios de atención.
-- **RF08:** Visualización global de citas programadas.
-
-#### 1.2.2. Requisitos No Funcionales
-
+#### Requisitos No Funcionales
 - Interfaz moderna y accesible con Jetpack Compose.
-- Persistencia local de datos mediante **SQLite**.
-- Posible integración futura de notificaciones push.
-- Rendimiento óptimo incluso en dispositivos Android de gama baja.
+- Funcionamiento 100% offline con SQLite.
+- Notificaciones locales mediante `WorkManager` y `NotificationManager`.
+- Buen rendimiento en dispositivos Android de gama baja.
 
 ---
 
 ## 2. Desarrollo de la aplicación
 
-### 2.1. Mapa de navegación
+### Mapa de navegación
+- **Cliente**: Login → HomeCliente → Nueva Cita / Historial / Detalle de Cita.
+- **Administrador**: Login → HomeAdmin → Calendario → Detalle de Cita → Crear / Editar / Filtrar citas.
 
-La aplicación se divide en dos grandes flujos:
-- **Cliente:** Login → Home → Nueva Cita / Historial / Detalle de Cita.
-- **Administrador:** Login → Home → Calendario de Citas → Detalle de Cita.
+---
 
-### 2.2. Interfaz gráfica
+### Interfaz gráfica
 
-Se ha priorizado la experiencia de usuario (UX) y la accesibilidad.
+#### Pantallas principales:
+- **Login/Registro**: Formularios con validación, mensajes de error y navegación fluida.
+- **Calendario (Admin)**: Vista mensual con días destacados por cita. Al seleccionar un día, se muestran los detalles.
+- **Nueva Cita**: DatePicker + horarios en bloques de 30 minutos (mañana/tarde), selector de servicio y peluquero, alert dialog para añadir al calendario.
+- **Historial (Cliente)**: Vista en `LazyVerticalGrid` con tarjetas diferenciando citas futuras y pasadas.
+- **AdminHomeScreen**: Gestión completa de citas, filtrado por día, búsqueda rápida, edición mediante diálogos modales, y selección de clientes existentes.
 
-**Pantallas principales:**
+---
 
-- **Login y Registro:** Formulario con validaciones claras y navegación fluida.
-- **Calendario (Admin):** Vista mensual con citas marcadas por día; permite filtrar y consultar detalles.
-- **Reserva de Cita:** DatePicker + selector de horario en bloques de 30 min (mañana/tarde).
-- **Historial (Cliente):** Lista cronológica de citas, diferenciando próximas y pasadas.
-- **Panel de Administrador:** Listado dinámico de citas, búsqueda rápida y edición desde diálogos modales.
+### Almacenamiento de la información
 
-> *Prototipos realizados con Balsamiq, Figma o Canva.*
+La app PeluCita gestiona localmente todos los datos mediante una base de datos **SQLite** sin utilizar Room, lo que permite mayor control sobre las operaciones SQL y un rendimiento más optimizado.
 
-### 2.3. Almacenamiento de la información
+#### Base de datos: SQLite local gestionada manualmente (con `SQLiteOpenHelper`)
 
-**Base de datos:** SQLite local gestionada manualmente (sin Room).
+---
 
-**Estructura:**
+#### Estructura de las tablas
 
-| Usuario             | Tipo      | Descripción                                |
-|---------------------|-----------|--------------------------------------------|
-| id                  | INTEGER   | PK AUTOINCREMENT                           |
-| nombre              | TEXT      | Nombre del usuario                         |
-| email               | TEXT      | Email único                                |
-| contraseña          | TEXT      | Contraseña                                 |
-| tipo                | TEXT      | 'cliente' o 'admin'                        |
+##### Tabla: `Usuario`
+| Campo     | Tipo     | Descripción                         |
+|-----------|----------|-------------------------------------|
+| id        | INTEGER  | PRIMARY KEY AUTOINCREMENT           |
+| nombre    | TEXT     | Nombre del usuario                  |
+| email     | TEXT     | Email único (clave de inicio)       |
+| contraseña| TEXT     | Contraseña del usuario              |
+| tipo      | TEXT     | Rol del usuario: `cliente` o `admin`|
 
-| Cita                | Tipo      | Descripción                                |
-|---------------------|-----------|--------------------------------------------|
-| id                  | INTEGER   | PK AUTOINCREMENT                           |
-| clienteId           | INTEGER   | FK → Usuario(id)                           |
-| fecha               | TEXT      | YYYY-MM-DD                                 |
-| hora                | TEXT      | HH:MM                                      |
-| motivo              | TEXT      | Descripción del servicio                   |
+##### Tabla: `Cita`
+| Campo       | Tipo     | Descripción                                      |
+|-------------|----------|--------------------------------------------------|
+| id          | INTEGER  | PRIMARY KEY AUTOINCREMENT                        |
+| clienteId   | INTEGER  | FOREIGN KEY → Usuario(id)                        |
+| fecha       | TEXT     | Fecha de la cita (formato `YYYY-MM-DD`)          |
+| hora        | TEXT     | Hora de la cita (formato `HH:MM`)                |
+| servicio    | TEXT     | Nombre del servicio reservado                    |
+| peluquero   | TEXT     | Nombre del peluquero asignado (opcional)         |
 
-**Gestión técnica:**
+##### Tabla: `Peluquero`
+| Campo     | Tipo     | Descripción                         |
+|-----------|----------|-------------------------------------|
+| id        | INTEGER  | PRIMARY KEY AUTOINCREMENT           |
+| nombre    | TEXT     | Nombre del peluquero/a              |
 
-- `onCreate()`: Crea las tablas.
-- `onUpgrade()`: Gestiona las migraciones.
-- Consultas manuales: `INSERT`, `UPDATE`, `SELECT`, `DELETE`.
+##### Tabla: `Servicio`
+| Campo     | Tipo     | Descripción                         |
+|-----------|----------|-------------------------------------|
+| id        | INTEGER  | PRIMARY KEY AUTOINCREMENT           |
+| nombre    | TEXT     | Nombre del servicio ofrecido        |
 
-**Disponibilidad horaria:**
+---
 
-No almacenada en la base de datos. Se define en la lógica:
-- Mañana: 10:00–14:00
-- Tarde: 16:30–20:00
+#### 🛠️ Gestión técnica
+- `onCreate()`: Crea todas las tablas y carga datos por defecto (admin, servicios, peluqueros).
+- `onUpgrade()`: Permite modificar la estructura manteniendo datos al actualizar versión.
+- Consultas: Se usan sentencias manuales SQL (`INSERT`, `UPDATE`, `SELECT`, `DELETE`).
+
+---
+
+#### 🕒 Disponibilidad horaria
+
+La disponibilidad **no se almacena en la base de datos**. Se define directamente en la lógica de la app:
+
+- **Turno de mañana**: 10:00 – 14:00
+- **Turno de tarde**: 16:30 – 20:00
+
+Estas franjas se dividen en bloques de 30 minutos. Las ya reservadas se deshabilitan automáticamente.
+
+---
+
 
 ---
 
 ## 3. Construcción de la aplicación
 
-### 3.1. Tecnologías seleccionadas
+### Tecnologías seleccionadas
+- **Sistema Operativo**: Android
+- **Lenguaje**: Kotlin
+- **Framework UI**: Jetpack Compose
+- **Base de Datos**: SQLite manual (SQLiteOpenHelper)
+- **Notificaciones locales**: WorkManager + NotificationManager
+- **Control de versiones**: Git + GitHub
 
-- **Sistema operativo:** Android
-- **Lenguaje:** Kotlin
-- **Framework UI:** Jetpack Compose
-- **Base de datos local:** SQLite manual (via `SQLiteOpenHelper`)
-- **Control de versiones:** Git + GitHub
-- **Prototipado:** Balsamiq / Figma / Canva
-- **Notificaciones (futuro):** Firebase Cloud Messaging
-
-### 3.2. Herramientas utilizadas
-
-- **IDE:** Android Studio
-- **Editor:** Android Studio con soporte para Compose
-- **Control de versiones:** Git + GitHub
-- **Modelado DB:** dbdiagram.io
-- **Diseño de navegación:** draw.io
-- **Testeo:** Emulador + dispositivos físicos
+### Herramientas utilizadas
+- IDE: Android Studio
+- Modelado DB: dbdiagram.io
+- Diseño UI/UX: Draw.io / Figma / Canva
+- Prototipado y pruebas: Emulador Android + dispositivos reales
 
 ---
 
 ## 4. Implantación o publicación
 
-### 4.1. Recursos físicos y lógicos
+### Recursos físicos y lógicos
 
-**Físicos:**
-- Dispositivos Android (smartphones/tablets) para pruebas.
-- PC/portátil con Android Studio y emuladores instalados.
+#### Físicos:
+- Dispositivos Android para pruebas.
+- PC con Android Studio, SDK y emuladores.
 
-**Lógicos:**
-- SQLite local (sin necesidad de hosting externo).
-- Cuenta Google Play (opcional para publicación).
-- Firebase (previsto para futuras integraciones).
-
-### 4.2. Procedimiento de implantación
-
-1. **Compilación y pruebas:** Validación en emuladores y dispositivos reales.
-2. **Generación APK/AAB:** Firma digital para distribución.
-3. **Publicación (opcional):**
-   - Configuración de ficha en Google Play.
-   - Subida y revisión.
-4. **Distribución interna:** Enlace directo o código QR para descarga.
-5. **Guía de instalación:** Instrucciones detalladas para usuarios finales.
-6. **Pruebas finales:** Verificación de la instalación y funcionalidades en entorno real.
+#### Lógicos:
+- SQLite local sin hosting externo.
+- Firebase (planificado a futuro).
+- Cuenta Google Play Developer (opcional para publicación).
 
 ---
 
-💬 *PeluCita es una app ágil, simple y eficaz para la gestión de citas en peluquerías, construida con tecnologías modernas y pensada para seguir creciendo en futuras versiones.*
+### Procedimiento de implantación
+
+1. **Compilación y prueba en emulador y móviles reales.**
+2. **Generación de APK firmado digitalmente.**
+3. **Publicación en Google Play (opcional):**
+   - Ficha de app, capturas, política de privacidad.
+4. **Distribución interna:**
+   - Compartir por enlace o QR.
+5. **Guía de instalación y requisitos mínimos.**
+6. **Pruebas finales de funcionamiento.**
+
+---
+
+> 💬 PeluCita es una app ágil, intuitiva y funcional para la gestión de citas, pensada para seguir creciendo con futuras integraciones como bases de datos online o notificaciones push avanzadas.
