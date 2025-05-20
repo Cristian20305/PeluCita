@@ -75,6 +75,8 @@ fun NuevaCitaScreen(
         calendar.get(Calendar.DAY_OF_MONTH)
     )
 
+    datePickerDialog.datePicker.minDate = System.currentTimeMillis() - 1000
+
     Column(
         Modifier
             .fillMaxSize()
