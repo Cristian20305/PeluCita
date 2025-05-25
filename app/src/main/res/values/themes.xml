@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <!-- 🎨 Tema PRINCIPAL -->
+    <!--  Tema PRINCIPAL -->
     <style name="Theme.PeluCita" parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <!-- Personalizacion de colores o tipografías  -->
         <item name="colorPrimary">@color/purple_500</item>
@@ -15,7 +15,7 @@
         <item name="windowSplashScreenBackground">@color/splash_background</item>
 
         <!-- Logo del splash screen (debe estar en res/drawable/logo_splash) -->
-        <item name="windowSplashScreenAnimatedIcon">@drawable/logo_splash</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/logo_splash_sinfondo</item>
 
         <!-- Al terminar el splash, cargamos el theme principal de la app -->
         <item name="postSplashScreenTheme">@style/Theme.PeluCita</item>
