@@ -61,19 +61,33 @@ fun NuevaCitaScreen(
 
     // Abrir calendario
     val calendar = Calendar.getInstance()
+    // Abrir calendario (bloquea días anteriores y fines de semana)
     val datePickerDialog = DatePickerDialog(
         context,
         { _, year, month, day ->
-            val selectedDate = String.format("%04d-%02d-%02d", year, month + 1, day)
-            fecha = selectedDate
-            val ocupadas = dbHelper.obtenerCitasPorFecha(selectedDate).map { it.hora }
-            horasLibres = generarHorasDisponibles().filterNot { it in ocupadas }
-            horaSeleccionada = "" // Reset
+            val selectedCalendar = Calendar.getInstance()
+            selectedCalendar.set(year, month, day)
+
+            val dayOfWeek = selectedCalendar.get(Calendar.DAY_OF_WEEK)
+
+            if (dayOfWeek == Calendar.SATURDAY || dayOfWeek == Calendar.SUNDAY) {
+                Toast.makeText(context, "No se pueden seleccionar sábados ni domingos", Toast.LENGTH_SHORT).show()
+            } else {
+                val selectedDate = String.format("%04d-%02d-%02d", year, month + 1, day)
+                fecha = selectedDate
+                val ocupadas = dbHelper.obtenerCitasPorFecha(selectedDate).map { it.hora }
+                horasLibres = generarHorasDisponibles().filterNot { it in ocupadas }
+                horaSeleccionada = "" // Reset
+            }
         },
         calendar.get(Calendar.YEAR),
         calendar.get(Calendar.MONTH),
         calendar.get(Calendar.DAY_OF_MONTH)
-    )
+    ).apply {
+        datePicker.minDate = System.currentTimeMillis() - 1000 // impide fechas anteriores a hoy
+    }
+
+
 
     datePickerDialog.datePicker.minDate = System.currentTimeMillis() - 1000
 
